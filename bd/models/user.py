@@ -13,6 +13,8 @@ class User:
 
     def save(self):
         """Save user to MongoDB"""
+        if users_collection.find_one({"email": self.email}):
+           return {"error": "Email already exists"}
         user_data = {
             "name": self.name,
             "email": self.email,
