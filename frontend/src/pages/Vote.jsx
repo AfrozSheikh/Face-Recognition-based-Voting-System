@@ -29,6 +29,9 @@ const Vote = () => {
     })
       .then((res) => res.json())
       .then((data) => {
+
+        console.log(data);
+        
         const election = data.elections.find((e) => e._id === electionId);
         if (election) {
           setCandidates(election.candidates);

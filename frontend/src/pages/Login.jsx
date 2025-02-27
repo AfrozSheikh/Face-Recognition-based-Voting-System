@@ -21,15 +21,16 @@ const Login = () => {
       });
 
       const data = await response.json();
+     
       console.log(data);
       
       if (!response.ok) throw new Error(data.message);
 
-      login(data.token);
+      login(data.token, data.role,data);
       alert("Login successful!");
 
-    //   navigate("/dashboard"); // Redirect to dashboard (to be created later)
-      navigate("/admin"); // Redirect to dashboard (to be created later)
+     navigate("/dashboard"); // Redirect to dashboard (to be created later)
+      //navigate("/admin"); // Redirect to dashboard (to be created later)
     } catch (err) {
       setError(err.message);
     }

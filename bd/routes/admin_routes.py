@@ -41,6 +41,19 @@ def admin_required(f):
     return decorated_function
 
 
+@admin_bp.route("/elections", methods=["GET"])
+@admin_required
+def get_elections():
+    try:
+        elections = list(elections_collection.find({}, {"_id": 1, "title": 1, "district": 1}))
+        print("elections")
+        for election in elections:
+            election["_id"] = str(election["_id"])  # Convert ObjectId to string
+
+        return jsonify({"elections": elections}), 200
+    except Exception as e:
+        return jsonify({"message": "Failed to fetch elections", "error": str(e)}), 500
+
 # def admin_required(f):
 #     """Admin authentication decorator"""
 #     @wraps(f)
@@ -63,18 +76,23 @@ def admin_required(f):
     
 #     return decorated_function
 
+from bson import ObjectId  # Import this to handle ObjectId conversion
+
 @admin_bp.route("/approve_voter", methods=["POST"])
 @admin_required
 def approve_voter():
     """Admin approves a voter"""
     data = request.json
-    email = data.get("email")
-    
-    user = users_collection.find_one({"email": email})
+    voter_id = data.get("voterId")  # Get voterId from frontend
+
+    if not voter_id:
+        return jsonify({"message": "Voter ID is required"}), 400  # Handle missing ID
+
+    user = users_collection.find_one({"_id": ObjectId(voter_id)})  # Find by ID
     if not user:
         return jsonify({"message": "User not found"}), 404
 
-    users_collection.update_one({"email": email}, {"$set": {"is_approved": True}})
+    users_collection.update_one({"_id": ObjectId(voter_id)}, {"$set": {"is_approved": True}})
     return jsonify({"message": "Voter approved successfully"}), 200
 
 @admin_bp.route("/reject_voter", methods=["POST"])
@@ -82,11 +100,13 @@ def approve_voter():
 def reject_voter():
     """Admin rejects a voter"""
     data = request.json
-    email = data.get("email")
+    voter_id = data.get("voterId")  # Get voterId from frontend
 
-    users_collection.delete_one({"email": email})
+    if not voter_id:
+        return jsonify({"message": "Voter ID is required"}), 400  # Handle missing ID
+
+    users_collection.delete_one({"_id": ObjectId(voter_id)})  # Delete user by ID
     return jsonify({"message": "Voter rejected and removed"}), 200
-
 @admin_bp.route("/create_election", methods=["POST"])
 @admin_required
 def create_election():

@@ -6,7 +6,7 @@ const ApproveVoters = () => {
   const [voters, setVoters] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/admin/pending-voters", {
+    fetch("http://localhost:5000/admin/pending_voters", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -15,7 +15,7 @@ const ApproveVoters = () => {
   }, [token]);
 
   const handleApproval = (voterId, status) => {
-    fetch("http://localhost:5000/admin/approve-voter", {
+    fetch("http://localhost:5000/admin/approve_voter", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,7 +39,7 @@ const ApproveVoters = () => {
         <ul>
           {voters.map((voter) => (
             <li key={voter._id}>
-              {voter.name} - {voter.email}
+              {voter.name} - {voter.email} - 
               <button onClick={() => handleApproval(voter._id, "approved")}>Approve</button>
               <button onClick={() => handleApproval(voter._id, "rejected")}>Reject</button>
             </li>

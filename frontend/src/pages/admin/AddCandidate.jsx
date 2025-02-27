@@ -17,6 +17,7 @@ const AddCandidate = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
+      console.log(data);
       
         
         if (response.ok) {
@@ -25,6 +26,8 @@ const AddCandidate = () => {
           setMessage(data.message || "Failed to fetch elections.");
         }
       } catch (error) {
+       
+        
         setMessage("Error: Could not fetch elections.");
       }
     };

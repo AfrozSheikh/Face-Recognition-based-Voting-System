@@ -37,12 +37,7 @@ from routes.admin_routes import admin_bp
 from routes.voter_routes import voter_bp
 
 app = Flask(__name__)
-CORS(app)  # Apply globally
-
-# ✅ Also apply CORS to individual blueprints
-CORS(auth_bp)
-CORS(admin_bp)
-CORS(voter_bp)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # Register Blueprints
 app.register_blueprint(auth_bp, url_prefix="/auth")

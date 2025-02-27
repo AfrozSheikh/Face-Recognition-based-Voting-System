@@ -10,6 +10,8 @@ import { AuthProvider } from "./context/AuthContext";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import ViewElections from "./pages/ViewElections";
 import Result from "./pages/Result";
+import Dashboard from "./pages/Dashboard";
+import Vote from "./pages/Vote";
 
 function App() {
   return (
@@ -18,8 +20,12 @@ function App() {
         <Routes>
           {/* Authentication Routes */}
           <Route path="/" element={<Signup />} />
+          <Route path="/vote" element={<Vote />} />
+          <Route path="/view-elections" element={<ViewElections />} />
           <Route path="/login" element={<Login />} />
           <Route path="/elections" element={<ViewElections />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+
           <Route path="/results" element={<Result />} />
           {/* Admin Routes - Protected */}
           <Route path="/admin" element={<AdminDashboard />} />
