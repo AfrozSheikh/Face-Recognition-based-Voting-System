@@ -2,7 +2,7 @@ from database import users_collection
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class User:
-    def __init__(self, name, email, password, district, role="voter", face_embedding=None, is_approved=False):
+    def __init__(self, name, email, password, district, face_embedding=None, role="voter", is_approved=False):
         self.name = name
         self.email = email
         self.password = generate_password_hash(password)

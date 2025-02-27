@@ -15,21 +15,53 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.headers.get("Authorization")
+
         if not token:
             return jsonify({"message": "Token missing"}), 403
 
         try:
+            # ✅ Remove "Bearer " prefix
+            if token.startswith("Bearer "):
+                token = token.split(" ")[1]
+
+            print("Decoded Token:", token)  # Debugging
+
             data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+
             if data["role"] != "admin":
                 return jsonify({"message": "Unauthorized"}), 403
+
         except jwt.ExpiredSignatureError:
             return jsonify({"message": "Token expired"}), 403
         except jwt.InvalidTokenError:
-            return jsonify({"message": "Invalid token"}), 403
+            return jsonify({"message": "Invalid token", "token": token}), 403
 
         return f(*args, **kwargs)
-    
+
     return decorated_function
+
+
+# def admin_required(f):
+#     """Admin authentication decorator"""
+#     @wraps(f)
+#     def decorated_function(*args, **kwargs):
+#         token = request.headers.get("Authorization")
+    
+#         if not token:
+#             return jsonify({"message": "Token missing"}), 403
+
+#         try:
+#             data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+#             if data["role"] != "admin":
+#                 return jsonify({"message": "Unauthorized"}), 403
+#         except jwt.ExpiredSignatureError:
+#             return jsonify({"message": "Token expired"}), 403
+#         except jwt.InvalidTokenError:
+#             return jsonify({"message": "Invalid token","tokken":token}), 403
+
+#         return f(*args, **kwargs)
+    
+#     return decorated_function
 
 @admin_bp.route("/approve_voter", methods=["POST"])
 @admin_required
@@ -60,10 +92,16 @@ def reject_voter():
 def create_election():
     """Admin creates a new election"""
     data = request.json
+    print(data)
     title = data.get("title")
     district = data.get("district")
-    start_time = datetime.datetime.strptime(data.get("start_time"), "%Y-%m-%d %H:%M:%S")
-    end_time = datetime.datetime.strptime(data.get("end_time"), "%Y-%m-%d %H:%M:%S")
+    start_time_str = data.get("start_time")  # Example: "2025-02-27T21:51"
+
+# ✅ Convert frontend format to backend expected format
+    start_time = datetime.datetime.strptime(start_time_str, "%Y-%m-%dT%H:%M")
+
+    end_time_str = data.get("end_time")
+    end_time = datetime.datetime.strptime(end_time_str, "%Y-%m-%dT%H:%M")
     
     election_data = {
         "title": title,
@@ -76,6 +114,31 @@ def create_election():
     elections_collection.insert_one(election_data)
 
     return jsonify({"message": "Election created successfully"}), 201
+
+
+
+@admin_bp.route("/pending_voters", methods=["GET"])
+@admin_required
+def get_pending_voters():
+    """Fetch all voters who are not yet approved"""
+    pending_voters = users_collection.find({"is_approved": False}, {"_id": 1, "name": 1, "email": 1})
+    
+    voter_list = [{"_id": str(voter["_id"]), "name": voter["name"], "email": voter["email"]} for voter in pending_voters]
+    
+    return jsonify({"pendingVoters": voter_list}), 200
+
+# @admin_bp.route("/approve_voter/<voter_id>", methods=["POST"])
+# @admin_required
+# def approve_voter(voter_id):
+#     """Approve or reject a voter"""
+#     data = request.json
+#     status = data.get("status")
+
+#     if status not in ["approved", "rejected"]:
+#         return jsonify({"error": "Invalid status"}), 400
+
+#     users_collection.update_one({"_id": ObjectId(voter_id)}, {"$set": {"status": status}})
+#     return jsonify({"message": f"Voter {status}"}), 200
 
 @admin_bp.route("/add_candidate", methods=["POST"])
 @admin_required

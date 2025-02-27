@@ -24,11 +24,11 @@ def signup():
     email = data.get("email")
     password = data.get("password")
     district = data.get("district")
-
+    face_embedding = data.get("face_embedding")  # Collect face embedding
     if User.find_by_email(email):
         return jsonify({"message": "User already exists"}), 400
 
-    new_user = User(name, email, password, district)
+    new_user = User(name, email, password, district,face_embedding)
     new_user.save()
 
     return jsonify({"message": "Signup successful. Wait for admin approval."}), 201
@@ -43,7 +43,7 @@ def login():
     # Admin Login
     if email == ADMIN_EMAIL :
         token = generate_token("admin", "admin")
-        return jsonify({"message": "Admin login successful", "token": token}), 200
+        return jsonify({"message": "Admin login successful", "token": token , "role" : "admin"}), 200
 
     # Voter Login
     user = User.find_by_email(email)
@@ -57,4 +57,4 @@ def login():
         return jsonify({"message": "Invalid credentials"}), 401
 
     token = generate_token(user["_id"], "voter")
-    return jsonify({"message": "Login successful", "token": token}), 200
+    return jsonify({"message": "Login successful", "token": token, "role":"voter"}), 200

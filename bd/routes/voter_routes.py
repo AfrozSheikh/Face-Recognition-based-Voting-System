@@ -99,6 +99,58 @@ def view_elections():
     
 #     return jsonify({"message": "Vote cast successfully"}), 200
 
+# @voter_bp.route("/vote", methods=["POST"])
+# @voter_required
+# def vote():
+#     """Voter casts a vote with face verification"""
+#     data = request.json
+#     voter_id = request.user_id
+#     election_id = data.get("election_id")
+#     candidate_name = data.get("candidate_name")
+#     live_image_path = data.get("live_image_path")  # Path to the live image
+
+#     user = users_collection.find_one({"_id": ObjectId(voter_id)})
+#     if not user:
+#         return jsonify({"message": "User not found"}), 404
+
+#     # Check if voter already voted
+#     if votes_collection.find_one({"voter_id": ObjectId(voter_id), "election_id": ObjectId(election_id)}):
+#         return jsonify({"message": "You have already voted"}), 403
+
+#     # Fetch election and check if it's ongoing
+#     election = elections_collection.find_one({"_id": ObjectId(election_id)})
+#     if not election:
+#         return jsonify({"message": "Election not found"}), 404
+
+#     if election["status"] != "ongoing":
+#         return jsonify({"message": "Voting is closed"}), 403
+
+#     # Face Verification
+#     if not verify_face(user["face_embedding"], live_image_path):
+#         return jsonify({"message": "Face verification failed"}), 403
+
+#     # Update votes
+#     result = elections_collection.update_one(
+#         {"_id": ObjectId(election_id), "candidates.name": candidate_name},
+#         {"$inc": {"candidates.$.votes": 1}}
+#     )
+
+#     if result.modified_count == 0:
+#         return jsonify({"message": "Candidate not found"}), 404
+
+#     votes_collection.insert_one({
+#         "voter_id": ObjectId(voter_id),
+#         "election_id": ObjectId(election_id),
+#         "candidate": candidate_name
+#     })
+    
+#     return jsonify({"message": "Vote cast successfully"}), 200
+
+
+import base64
+import cv2
+import numpy as np
+
 @voter_bp.route("/vote", methods=["POST"])
 @voter_required
 def vote():
@@ -107,11 +159,16 @@ def vote():
     voter_id = request.user_id
     election_id = data.get("election_id")
     candidate_name = data.get("candidate_name")
-    live_image_path = data.get("live_image_path")  # Path to the live image
+    live_image_base64 = data.get("live_image")  # Base64 image from frontend
 
     user = users_collection.find_one({"_id": ObjectId(voter_id)})
     if not user:
         return jsonify({"message": "User not found"}), 404
+
+    # Decode base64 image
+    live_image_data = base64.b64decode(live_image_base64.split(",")[1])
+    nparr = np.frombuffer(live_image_data, np.uint8)
+    live_image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
     # Check if voter already voted
     if votes_collection.find_one({"voter_id": ObjectId(voter_id), "election_id": ObjectId(election_id)}):
@@ -126,7 +183,7 @@ def vote():
         return jsonify({"message": "Voting is closed"}), 403
 
     # Face Verification
-    if not verify_face(user["face_embedding"], live_image_path):
+    if not verify_face(user["face_embedding"], live_image):
         return jsonify({"message": "Face verification failed"}), 403
 
     # Update votes
@@ -145,7 +202,6 @@ def vote():
     })
     
     return jsonify({"message": "Vote cast successfully"}), 200
-
 @voter_bp.route("/view_results", methods=["GET"])
 @voter_required
 def view_results():
@@ -156,9 +212,31 @@ def view_results():
     if not user:
         return jsonify({"message": "User not found"}), 404
 
-    elections = list(elections_collection.find({"district": user["district"], "status": "completed"}))
-    
+    elections = list(elections_collection.find(
+        {"district": user["district"], "status": "completed"},
+        {"_id": 1, "name": 1, "candidates": 1, "winner": 1}
+    ))
+
     for election in elections:
         election["_id"] = str(election["_id"])  # Convert ObjectId to string
+        for candidate in election["candidates"]:
+            candidate["votes"] = candidate.get("votes", 0)  # Ensure votes are included
 
-    return jsonify({"results": elections}), 200
+    return jsonify({"results": elections}), 200  
+
+# @voter_bp.route("/view_results", methods=["GET"])
+# @voter_required
+# def view_results():
+#     """Voter can view election results"""
+#     voter_id = request.user_id  # Extract voter ID from JWT
+
+#     user = users_collection.find_one({"_id": ObjectId(voter_id)})
+#     if not user:
+#         return jsonify({"message": "User not found"}), 404
+
+#     elections = list(elections_collection.find({"district": user["district"], "status": "completed"}))
+    
+#     for election in elections:
+#         election["_id"] = str(election["_id"])  # Convert ObjectId to string
+
+#     return jsonify({"results": elections}), 200
