@@ -1,4 +1,4 @@
-# 🗳️ Face-Verified Online Voting System  
+# 🗳️ Face-Recognition-Based Online Voting System  
 
 A secure online voting system built using **Flask (Python) & React (Vite)** with **MongoDB** for data storage.  
 This system ensures voter authenticity using **Face ID verification** powered by **DeepFace**.  
