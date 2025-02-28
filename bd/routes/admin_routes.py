@@ -210,3 +210,72 @@ def declare_results():
     result = Election.declare_results(election_id)
 
     return jsonify(result), 200 if "message" in result else 400  # Return appropriate status code
+
+
+# from flask_jwt_extended import jwt_required, get_jwt_identity
+# @admin_bp.route("/view_results", methods=["GET"])
+# @jwt_required()
+# def view_results():
+#     """Both Admin and Voter can view election results"""
+#     user_id = get_jwt_identity()  # ✅ Correct way to get user ID from JWT
+
+
+#     user = users_collection.find_one({"_id": ObjectId(user_id)})
+#     if not user:
+#         return jsonify({"message": "User not found"}), 404
+
+#     # If admin, show all completed elections
+    
+#     elections = list(elections_collection.find(
+#             {"status": "completed"},
+#             {"_id": 1, "title": 1, "district": 1, "candidates": 1, "winner": 1}
+#     ))
+    
+#     # If voter, show only completed elections in their district
+    
+
+#     for election in elections:
+#         election["_id"] = str(election["_id"])  # Convert ObjectId to string
+#         for candidate in election["candidates"]:
+#             candidate["votes"] = candidate.get("votes", 0)  # Ensure votes field exists
+
+#     return jsonify({"results": elections}), 200
+
+# from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+
+# @admin_bp.route("/view_results", methods=["GET"])
+
+# def view_results():
+#     """Admin can view all election results"""
+
+#     # Debugging: Print the JWT token content
+#     # Fetch all completed elections
+#     elections = list(elections_collection.find(
+#         {"status": "completed"},
+#         {"_id": 1, "title": 1, "district": 1, "candidates": 1, "winner": 1}
+#     ))
+
+#     for election in elections:
+#         election["_id"] = str(election["_id"])  # Convert ObjectId to string
+#         for candidate in election["candidates"]:
+#             candidate["votes"] = candidate.get("votes", 0)  # Ensure votes exist
+
+#     return jsonify({"results": elections}), 200
+
+@admin_bp.route("/view_results", methods=["GET"])
+def view_results():
+    """Anyone can view all election results"""
+
+    elections = list(elections_collection.find(
+        {"status": "completed"},
+        {"_id": 1, "title": 1, "district": 1, "candidates": 1, "winner": 1}
+    ))
+
+    # Convert ObjectId to string
+    for election in elections:
+        election["_id"] = str(election["_id"])
+        for candidate in election["candidates"]:
+            candidate["votes"] = candidate.get("votes", 0)  # Ensure votes exist
+
+    return jsonify({"results": elections}), 200
+

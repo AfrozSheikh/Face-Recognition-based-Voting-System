@@ -9,6 +9,7 @@ const AdminDashboard = () => {
         <li><Link to="/admin/create-election">Create Election</Link></li>
         <li><Link to="/admin/add-candidate">Add Candidate</Link></li>
         <li><Link to="/admin/declare-results">Declare Results</Link></li>
+        <li><Link to="/admin/results">see result</Link></li>
       </ul>
     </div>
   );

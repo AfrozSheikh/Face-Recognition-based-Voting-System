@@ -202,12 +202,13 @@ def vote():
     })
     
     return jsonify({"message": "Vote cast successfully"}), 200
+
 @voter_bp.route("/view_results", methods=["GET"])
 @voter_required
 def view_results():
     """Voter can view election results"""
     voter_id = request.user_id  # Extract voter ID from JWT
-
+    print(voter_id)
     user = users_collection.find_one({"_id": ObjectId(voter_id)})
     if not user:
         return jsonify({"message": "User not found"}), 404

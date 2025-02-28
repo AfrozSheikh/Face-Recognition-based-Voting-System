@@ -29,8 +29,8 @@ const Login = () => {
       login(data.token, data.role,data);
       alert("Login successful!");
 
-     navigate("/dashboard"); // Redirect to dashboard (to be created later)
-      //navigate("/admin"); // Redirect to dashboard (to be created later)
+     if(data.role==="voter")navigate("/dashboard"); // Redirect to dashboard (to be created later)
+     else  navigate("/admin"); // Redirect to dashboard (to be created later)
     } catch (err) {
       setError(err.message);
     }

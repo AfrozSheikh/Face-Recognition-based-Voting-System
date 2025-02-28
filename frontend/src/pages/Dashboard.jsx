@@ -72,6 +72,13 @@ const Dashboard = () => {
           </button>
         </li>
         <li>
+          <button onClick={() => navigate("/results")}>
+            Result
+          </button>
+        </li>
+
+
+        <li>
           <button onClick={() => navigate("/vote")}>Cast Vote</button>
         </li>
       </ul>

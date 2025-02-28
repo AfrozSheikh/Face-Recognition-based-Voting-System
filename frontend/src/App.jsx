@@ -12,6 +12,7 @@ import ViewElections from "./pages/ViewElections";
 import Result from "./pages/Result";
 import Dashboard from "./pages/Dashboard";
 import Vote from "./pages/Vote";
+import AdminResult from "./pages/admin/AdminResult";
 
 function App() {
   return (
@@ -33,6 +34,8 @@ function App() {
           <Route path="/admin/create-election" element={<CreateElection />} />
           <Route path="/admin/add-candidate" element={<AddCandidate />} />
           <Route path="/admin/declare-results" element={<DeclareResults />} />
+          <Route path="/admin/results" element={<AdminResult />} />
+
         </Routes>
      
   );

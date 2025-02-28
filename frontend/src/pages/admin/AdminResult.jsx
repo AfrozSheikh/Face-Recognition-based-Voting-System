@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const Result = () => {
-  const { token } = useAuth();
+const AdminResult = () => {
+  const { token,role } = useAuth();
   const [elections, setElections] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -13,9 +13,10 @@ const Result = () => {
       navigate("/login");
       return;
     }
-
-    fetch("http://127.0.0.1:5000/voter/view_results", {
-      headers: { Authorization: token }, // Fix: Ensure "Bearer" prefix
+    console.log(role);
+    
+    fetch("http://127.0.0.1:5000/admin/view_results", {
+      // headers: { Authorization: `Bearer ${token}` }, // Fix: Ensure "Bearer" prefix
     })
       .then((res) => res.json())
       .then((data) => {
@@ -26,7 +27,7 @@ const Result = () => {
         setLoading(false);
       })
       .catch((err) => console.error("Fetch Error:", err));
-  }, [token, navigate]);
+  }, [role, navigate]);
 
   return (
     <div>
@@ -63,4 +64,4 @@ const Result = () => {
   );
 };
 
-export default Result;
+export default AdminResult;
