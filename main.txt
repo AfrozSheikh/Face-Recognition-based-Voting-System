@@ -1,2 +1,7 @@
+
+Admin Credentials 
+
 admin@example.com
 admin123
+
+Thank me later <3
